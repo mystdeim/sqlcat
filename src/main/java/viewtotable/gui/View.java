@@ -2,7 +2,9 @@ package viewtotable.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +28,9 @@ import javax.swing.border.BevelBorder;
 
 public class View {
 	
+	private JTextField _file_db_field;
+	private JPanel _b_main;
+
 	public View() {
 		init();
 	}
@@ -67,6 +72,14 @@ public class View {
 	
 	public void setPassword(String txt) {
 		_pass_field.setText(txt);
+	}
+	
+	public String getDbFilePath() {
+		return _file_db_field.getText().trim();
+	}
+	
+	public void setDbFilePath(String txt) {
+		_file_db_field.setText(txt);
 	}
 	
 	public String getPort() {
@@ -141,6 +154,10 @@ public class View {
 		return _check_all;
 	}
 	
+	public JComboBox<String> getDBTypeComboBox() {
+		return _type_db;
+	}
+	
 	// Specific
 	// -----------------------------------------------------------------------------------------------------------------
 	
@@ -185,44 +202,102 @@ public class View {
 	private JPanel getSettingsTab() {
 		JPanel main = new JPanel(new BorderLayout());
 		
-		JPanel body = new JPanel();
-		body.setLayout(new GridLayout(7, 2));
-		
-		body.add(new JLabel("server: ", Label.RIGHT));
-		_server_field = new JTextField(20);
-		body.add(_server_field);
-		
-		body.add(new JLabel("database: ", Label.RIGHT));
-		_db_field = new JTextField(20);
-		body.add(_db_field);
-		
-		body.add(new JLabel("login: ", Label.RIGHT));
-		_login_field = new JTextField(20);
-		body.add(_login_field);
-		
-		body.add(new JLabel("password: ", Label.RIGHT));
-		_pass_field = new JPasswordField(20);
-		body.add(_pass_field);
-		
-		body.add(new JLabel("port: ", Label.RIGHT));
-		_port_field = new JTextField(20);
-		body.add(_port_field);
-		
-		body.add(new JLabel("type db: ", Label.RIGHT));
+		JPanel type_panel = new JPanel(new BorderLayout());
+		type_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		type_panel.add(new JLabel("type db: ", Label.RIGHT), BorderLayout.WEST);
 		_type_db = new JComboBox<String>();
 		_type_db.addItem("mssql");
-		body.add(_type_db);
+		_type_db.addItem("oracle");
+		_type_db.addItem("sqlite");
+		type_panel.add(_type_db, BorderLayout.CENTER);
+		main.add(type_panel, BorderLayout.NORTH);
+					
+
+		_server_field = new JTextField(20);
+		_db_field = new JTextField(20);
+		_login_field = new JTextField(20);
+		_pass_field = new JPasswordField(20);
+		_port_field = new JTextField(20);
+		_file_db_field = new JTextField(20);
 		
-		body.add(new JLabel("", Label.RIGHT));
+		_b_main = new JPanel(new BorderLayout());
+		_b_main.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+		main.add(_b_main);
+		
+		JPanel check_panel = new JPanel(new BorderLayout());
+		check_panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		_check_connection = new JButton("Check connection");
-		body.add(_check_connection);
-		
-		JPanel top = new JPanel(new BorderLayout());
-		top.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		top.add(body, BorderLayout.WEST);
-		main.add(top, BorderLayout.NORTH);
-		
+		check_panel.add(_check_connection, BorderLayout.WEST);
+		main.add(check_panel, BorderLayout.SOUTH);
+				
 		return main;
+	}
+		
+	public void getPanelCon1() {
+		_b_main.removeAll();
+		JPanel body = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints c_left = new GridBagConstraints(0,0,1,1,0,0,
+				GridBagConstraints.EAST,GridBagConstraints.HORIZONTAL,new Insets(5, 5, 5, 5),0,0);
+		GridBagConstraints c_right = new GridBagConstraints(1,0,1,1,100,0,
+				GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5, 5, 5, 5),0,0);		
+
+		body.add(new JLabel("server:"), c_left);		
+		body.add(_server_field, c_right);		
+		
+		c_left.gridy++;
+		body.add(new JLabel("database:"), c_left);
+		c_right.gridy++;
+		body.add(_db_field, c_right);
+		
+		c_left.gridy++;
+		body.add(new JLabel("login:"), c_left);
+		c_right.gridy++;
+		body.add(_login_field, c_right);
+		
+		c_left.gridy++;
+		body.add(new JLabel("password:"), c_left);
+		c_right.gridy++;
+		body.add(_pass_field, c_right);
+		
+		c_left.gridy++;
+		body.add(new JLabel("port:"), c_left);
+		c_right.gridy++;
+		body.add(_port_field, c_right);
+		
+		c_left.gridy++;
+		c_left.gridheight++;
+		c_left.weighty = 100;
+		body.add(new JPanel(), c_left);
+		
+		_b_main.add(body, BorderLayout.CENTER);
+		_b_main.revalidate();
+	}
+	
+	public void getPanelCon2() {
+		_b_main.removeAll();
+		JPanel body = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints c_left = new GridBagConstraints(0,0,1,1,0,0,
+				GridBagConstraints.EAST,GridBagConstraints.HORIZONTAL,new Insets(5, 5, 5, 5),0,0);
+		GridBagConstraints c_right = new GridBagConstraints(1,0,1,1,100,0,
+				GridBagConstraints.WEST,GridBagConstraints.HORIZONTAL,new Insets(5, 5, 5, 5),0,0);		
+
+		body.add(new JLabel("file:"), c_left);		
+		
+		JPanel db_field = new JPanel(new BorderLayout());
+		db_field.add(_file_db_field, BorderLayout.CENTER);
+		JButton path_button = getFileButton(_file_db_field);
+		db_field.add(path_button, BorderLayout.EAST);
+		body.add(db_field, c_right);	
+		
+		c_left.gridy++;
+		c_left.gridheight++;
+		c_left.weighty = 100;
+		body.add(new JPanel(), c_left);
+
+		_b_main.add(body, BorderLayout.CENTER);
+		_b_main.revalidate();
 	}
 	
 	private JPanel getExportTab() {

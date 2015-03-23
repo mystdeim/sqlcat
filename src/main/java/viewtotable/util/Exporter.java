@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,8 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.microsoft.sqlserver.jdbc.SQLServerConnection;
 
 public class Exporter extends AbstractWorker {
 	
@@ -34,7 +33,7 @@ public class Exporter extends AbstractWorker {
 	private void generate(String objects_name, String file_path, boolean all) throws IOException, SQLException {
 		Charset charset = Charset.forName("utf-8");
 		Path path = Paths.get(file_path);
-		try (SQLServerConnection con = (SQLServerConnection) _ds.getConnection();
+		try (Connection con = _ds.getConnection();
 				BufferedWriter writer = Files.newBufferedWriter(path, charset)) {	
 			con.setAutoCommit(false);
 			
@@ -59,7 +58,7 @@ public class Exporter extends AbstractWorker {
 		completed(String.format("File '%s' created, size: %s", file_path, humanReadableSize(Files.size(path))));
 	}	
 	
-	private void generate(String table_name, SQLServerConnection con, Writer writer) throws SQLException, IOException {
+	private void generate(String table_name, Connection con, Writer writer) throws SQLException, IOException {
 		_types = new HashMap<String, String>();		
 		String sql = "select * from " + table_name;			
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -82,7 +81,7 @@ public class Exporter extends AbstractWorker {
 		}
 	}
 	
-	private long getCount(String table_name, SQLServerConnection con) throws SQLException, IOException {
+	private long getCount(String table_name, Connection con) throws SQLException, IOException {
 		String sql = "select count(*) from " + table_name;			
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
 			ps.setFetchSize(MAX_FETCH_SIZE);

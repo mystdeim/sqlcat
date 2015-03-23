@@ -3,7 +3,7 @@ package viewtotable.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+import viewtotable.db.DBDriver;
 
 public abstract class AbstractWorker {
 	
@@ -12,14 +12,16 @@ public abstract class AbstractWorker {
 	}
 	
 	public AbstractWorker() {
-		_ds = new SQLServerDataSource();
+		
 	}
 	
-	public void setParams(String server, String db, String login, String pass, String port, String type_db) {
+	public void setParams(String server, String db, String login, String pass, String port, String type_db, String file_db) {
+		_ds = DBDriver.getDriver(type_db);				
 		_ds.setServerName(server);
 		_ds.setDatabaseName(db);
 		_ds.setUser(login);
 		_ds.setPassword(pass);
+		_ds.setFileDb(file_db);
 		if (port != null && !port.isEmpty()) {
 			_ds.setPortNumber(Integer.valueOf(port));
 		}
@@ -31,7 +33,7 @@ public abstract class AbstractWorker {
 		_isRunning = flag;
 	}
 
-	protected SQLServerDataSource _ds;
+	protected DBDriver _ds;
 	protected volatile boolean _isRunning;
 	protected TYPE_DB _type_db;
 	

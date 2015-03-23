@@ -1,0 +1,12 @@
+#ViewToTable
+#Mon Mar 23 17:04:47 MSK 2015
+viewtotable.gui.Controller.export_filepath=C\:\\tmp\\export.sql
+viewtotable.gui.Controller.login=PKUIB2013
+viewtotable.gui.Controller.server=10.1.1.12
+viewtotable.gui.Controller.objectname=soz_event_stat_501
+viewtotable.gui.Controller.db_type=oracle
+viewtotable.gui.Controller.import_filepath=
+viewtotable.gui.Controller.password=qwerty
+viewtotable.gui.Controller.port=
+viewtotable.gui.Controller.db=ORASOZDB
+viewtotable.gui.Controller.db_file_path=C\:\\tmp\\sqltmp.sqlite

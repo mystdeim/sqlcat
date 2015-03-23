@@ -3,27 +3,30 @@ package viewtotable.gui;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
-
+import viewtotable.db.DBDriver;
 import viewtotable.util.Exporter;
 import viewtotable.util.Importer;
 import viewtotable.util.WorkerListener;
 
 
 public class Controller {
+	private String _db_file_path;
+	private String _db_type;
+
 	public Controller(View view) {
 		_view = view;
 		init();
 	}
 		
 	public void loadSettings(Properties props) {
+		if (null != props.get(DB_TYPE_FIELD)) _db_type = props.get(DB_TYPE_FIELD).toString();
+		else _db_type = "";
 		if (null != props.get(SERVER_FIELD)) _server = props.get(SERVER_FIELD).toString();
 		else _server = "";
 		if (null != props.get(PORT_FIELD)) _port = props.get(PORT_FIELD).toString();
@@ -34,7 +37,9 @@ public class Controller {
 		else _login = "";
 		if (null != props.get(PASSWORD_FIELD)) _password = props.get(PASSWORD_FIELD).toString();
 		else _password = "";
-		if (null != props.get(FILEPATH_FIELD)) _export_filepath = props.get(FILEPATH_FIELD).toString();
+		if (null != props.get(DB_FILEPATH_FIELD)) _db_file_path = props.get(DB_FILEPATH_FIELD).toString();
+		else _db_file_path = "";
+		if (null != props.get(EXPORT_FILEPATH_FIELD)) _export_filepath = props.get(EXPORT_FILEPATH_FIELD).toString();
 		else _export_filepath = "";
 		if (null != props.get(IMPORT_FILEPATH_FIELD)) _import_filepath = props.get(IMPORT_FILEPATH_FIELD).toString();
 		else _import_filepath = "";
@@ -46,17 +51,26 @@ public class Controller {
 
 	public void saveSettings(Properties props) {
 		updateDbProps();
+		props.put(DB_TYPE_FIELD, _db_type.trim());
 		props.put(SERVER_FIELD, _server.trim());
 		props.put(DB_FIELD, _db.trim());
 		props.put(LOGIN_FIELD, _login.trim());
 		props.put(PASSWORD_FIELD, _password.trim());
+		props.put(DB_FILEPATH_FIELD, _db_file_path.trim());
 		props.put(PORT_FIELD, _port.trim());
-		props.put(FILEPATH_FIELD, _export_filepath.trim());
+		props.put(EXPORT_FILEPATH_FIELD, _export_filepath.trim());
 		props.put(IMPORT_FILEPATH_FIELD, _import_filepath.trim());
 		props.put(OBJECTNAME_FIELD, _objectname.trim());
 	}
 	
-	private void init() {		
+	private void init() {	
+		_view.getDBTypeComboBox().addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				changeConSettings();
+			}
+		});
+		changeConSettings();
 		_view.getExportStartButton().addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -150,10 +164,12 @@ public class Controller {
 	}
 	
 	private void updateView() {
+		_view.getDBTypeComboBox().setSelectedItem(_db_type);
 		_view.setServerName(_server);
 		_view.setDbName(_db);
 		_view.setLogin(_login);
 		_view.setPassword(_password);
+		_view.setDbFilePath(_db_file_path);
 		_view.setPort(_port);
 		_view.setObjectName(_objectname);
 		_view.setFilePathExport(_export_filepath);
@@ -161,10 +177,12 @@ public class Controller {
 	}
 	
 	private void updateDbProps() {
+		_db_type = _view.getDBType();
 		_server = _view.getServerName();
 		_db = _view.getDbName();
 		_login = _view.getLogin();
 		_password = _view.getPassword();
+		_db_file_path = _view.getDbFilePath();
 		_port = _view.getPort();
 		_objectname = _view.getObjectName();
 		_export_filepath = _view.getFilePathExport();
@@ -227,12 +245,25 @@ public class Controller {
 		});
 	}
 	
+	private void changeConSettings() {
+		EventQueue.invokeLater(new Runnable() {					
+			@Override
+			public void run() {
+				String type = _view.getDBType();
+				if (type.equals("sqlite")) _view.getPanelCon2();	
+				else _view.getPanelCon1();
+			}
+		});
+	}
+
+	private static final String DB_TYPE_FIELD = Controller.class.getCanonicalName() + ".db_type";
 	private static final String SERVER_FIELD = Controller.class.getCanonicalName() + ".server";
 	private static final String DB_FIELD = Controller.class.getCanonicalName() + ".db";
 	private static final String LOGIN_FIELD = Controller.class.getCanonicalName() + ".login";
 	private static final String PASSWORD_FIELD = Controller.class.getCanonicalName() + ".password";
+	private static final String DB_FILEPATH_FIELD = Controller.class.getCanonicalName() + ".db_file_path";
 	private static final String PORT_FIELD = Controller.class.getCanonicalName() + ".port";
-	private static final String FILEPATH_FIELD = Controller.class.getCanonicalName() + ".filepath";
+	private static final String EXPORT_FILEPATH_FIELD = Controller.class.getCanonicalName() + ".export_filepath";
 	private static final String OBJECTNAME_FIELD = Controller.class.getCanonicalName() + ".objectname";
 	private static final String IMPORT_FILEPATH_FIELD = Controller.class.getCanonicalName() + ".import_filepath";
 
@@ -263,35 +294,25 @@ public class Controller {
 					_view.setStatusMsg("Checking connetion...");
 					_view.setEnableControls(false);
 				}
-			});			
+			});	
 			
-			SQLServerDataSource ds = new SQLServerDataSource();
-			ds.setServerName(_server);
-			ds.setDatabaseName(_db);
-			ds.setUser(_login);
-			ds.setPassword(_password);
-			if (_port != null && !_port.isEmpty()) {
-				ds.setPortNumber(Integer.valueOf(_port));
-			}
+			String db_type = _view.getDBType();
+					
+			DBDriver driver = DBDriver.getDriver(db_type);
+			driver.setServerName(_server);
+			driver.setDatabaseName(_db);
+			driver.setUser(_login);
+			driver.setPassword(_password);
+			if (_port != null && !_port.isEmpty()) driver.setPortNumber(Integer.valueOf(_port));
 			
-			try(Connection con = ds.getConnection()) {
+			try {
+				driver.getConnection();
 				EventQueue.invokeLater(new Runnable() {			
 					@Override
 					public void run() {
 						_view.setStatusMsg("Connection is Ok");
 					}
-				});
-				
-//				DatabaseMetaData meta = con.getMetaData();
-//				ResultSet rs = meta.getTables(null, "dbo", "%", new String[] {"TABLE", "VIEW"});
-//				int columns = rs.getMetaData().getColumnCount();
-//				while (rs.next()) {
-//					for (int i=1; i<=columns; i++) {
-//						System.out.print(rs.getString(i) + " ");
-//					}
-//					System.out.println();
-//				}
-				
+				});				
 				showSuccess();
 			} catch (SQLException e) {			
 				EventQueue.invokeLater(new Runnable() {			
@@ -327,7 +348,7 @@ public class Controller {
 			});
 			
 			try {
-				_exporter.setParams(_server, _db, _login, _password, _port, _view.getDBType());
+				_exporter.setParams(_server, _db, _login, _password, _port, _view.getDBType(), _db_file_path);
 				if (_view.getCheckBoxAllTables().isSelected()) _exporter.generate(_export_filepath);
 				else _exporter.generate(_objectname, _export_filepath);
 				
@@ -358,7 +379,7 @@ public class Controller {
 			});
 			
 			try {
-				_importer.setParams(_server, _db, _login, _password, _port, _view.getDBType());
+				_importer.setParams(_server, _db, _login, _password, _port, _view.getDBType(), _db_file_path);
 				_importer.generate(_import_filepath);
 				
 				showSuccess();

@@ -1,11 +1,11 @@
-package viewtotable.db;
+package sqlcat.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import viewtotable.db.drivers.MsSqlDriver;
-import viewtotable.db.drivers.OracleDriver;
-import viewtotable.db.drivers.SqliteDriver;
+import sqlcat.db.drivers.MsSqlDriver;
+import sqlcat.db.drivers.OracleDriver;
+import sqlcat.db.drivers.SqliteDriver;
 
 public abstract class DBDriver {
 	

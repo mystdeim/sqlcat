@@ -1,4 +1,4 @@
-package viewtotable.gui;
+package sqlcat.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -158,6 +158,14 @@ public class View {
 		return _type_db;
 	}
 	
+	public boolean isCreateAllTables() {
+		return _check_all.isSelected();
+	}
+	
+	public boolean isCreateTable() {
+		return _create_table_box.isSelected();
+	}
+	
 	// Specific
 	// -----------------------------------------------------------------------------------------------------------------
 	
@@ -210,8 +218,7 @@ public class View {
 		_type_db.addItem("oracle");
 		_type_db.addItem("sqlite");
 		type_panel.add(_type_db, BorderLayout.CENTER);
-		main.add(type_panel, BorderLayout.NORTH);
-					
+		main.add(type_panel, BorderLayout.NORTH);					
 
 		_server_field = new JTextField(20);
 		_db_field = new JTextField(20);
@@ -319,6 +326,12 @@ public class View {
 		all_tables_panel.add(_check_all, BorderLayout.CENTER);
 		top.add(all_tables_panel);
 		
+		JPanel create_table_panel = new JPanel(new BorderLayout());
+		create_table_panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 5));
+		_create_table_box = new JCheckBox("Create table definition");
+		create_table_panel.add(_create_table_box, BorderLayout.CENTER);
+		top.add(create_table_panel);
+		
 		JPanel file_panel = new JPanel(new BorderLayout());
 		file_panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		_file_path_export = new JTextField();
@@ -402,6 +415,7 @@ public class View {
 	private JButton _export_start_button;
 	private JButton _export_stop_button;
 	private JCheckBox _check_all;
+	private JCheckBox _create_table_box;
 	private JButton _import_start_button;
 	private JButton _import_stop_button;
 	private JComboBox<String> _type_db;

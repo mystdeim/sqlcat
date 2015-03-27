@@ -1,9 +1,9 @@
-package viewtotable.util;
+package sqlcat.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import viewtotable.db.DBDriver;
+import sqlcat.db.DBDriver;
 
 public abstract class AbstractWorker {
 	

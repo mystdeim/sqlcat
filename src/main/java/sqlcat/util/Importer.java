@@ -1,4 +1,4 @@
-package viewtotable.util;
+package sqlcat.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -9,12 +9,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.microsoft.sqlserver.jdbc.SQLServerConnection;
-
 public class Importer extends AbstractWorker {
 	
 	public void generate(String file_path) throws IOException, SQLException {
-		try (SQLServerConnection con = (SQLServerConnection) _ds.getConnection()) {
+		try (Connection con = _ds.getConnection()) {
 			con.setAutoCommit(false);
 			runScript(con, file_path);
 		} 

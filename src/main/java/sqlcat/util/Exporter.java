@@ -1,4 +1,4 @@
-package viewtotable.util;
+package sqlcat.util;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -22,15 +22,7 @@ public class Exporter extends AbstractWorker {
 	
 	private static final int MAX_FETCH_SIZE = 100;
 	
-	public void generate(String objects_name, String file_path) throws IOException, SQLException {
-		generate(objects_name, file_path, false);
-	}
-	
-	public void generate(String file_path) throws IOException, SQLException {
-		generate(null, file_path, true);
-	}
-	
-	private void generate(String objects_name, String file_path, boolean all) throws IOException, SQLException {
+	public void generate(String objects_name, String file_path, boolean all, boolean table_def) throws IOException, SQLException {
 		Charset charset = Charset.forName("utf-8");
 		Path path = Paths.get(file_path);
 		try (Connection con = _ds.getConnection();
@@ -50,7 +42,7 @@ public class Exporter extends AbstractWorker {
 			if (null != objects) {
 				for (String object : objects) {	
 					// to avoid read the entire result into memory
-					generate(object.trim(), con, writer);
+					generate(object.trim(), con, writer, table_def);
 				}
 			}
 		} 
@@ -58,7 +50,7 @@ public class Exporter extends AbstractWorker {
 		completed(String.format("File '%s' created, size: %s", file_path, humanReadableSize(Files.size(path))));
 	}	
 	
-	private void generate(String table_name, Connection con, Writer writer) throws SQLException, IOException {
+	private void generate(String table_name, Connection con, Writer writer, boolean table_def) throws SQLException, IOException {
 		_types = new HashMap<String, String>();		
 		String sql = "select * from " + table_name;			
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -72,7 +64,13 @@ public class Exporter extends AbstractWorker {
 			foundMsg(table_name, row_count);
 
 			if (isStopped()) return;
-			createTable(table_name, rs, writer);
+
+			ResultSetMetaData meta = rs.getMetaData();
+			for (int i=1; i<=meta.getColumnCount(); i++) {
+				_types.put(meta.getColumnName(i),  meta.getColumnTypeName(i));
+			}
+			if (table_def) createTable(table_name, rs, writer, meta);
+			
 			long row_exported = 0;
 			if (null != row_count) {
 				row_exported = createInserts(table_name, rs, row_count, writer);
@@ -93,8 +91,7 @@ public class Exporter extends AbstractWorker {
 		return 0;
 	}
 	
-	private void createTable(String table_name, ResultSet rs, Writer writer) throws SQLException, IOException {
-		ResultSetMetaData meta = rs.getMetaData();
+	private void createTable(String table_name, ResultSet rs, Writer writer, ResultSetMetaData meta) throws SQLException, IOException {
 		writer.write(String.format(
 				"if exists (select * from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '%1$s') drop table %1$s;\n", 
 				table_name));
@@ -102,7 +99,6 @@ public class Exporter extends AbstractWorker {
 		for (int i=1; i<=meta.getColumnCount(); i++) {
 			writer.write(String.format("\t[%s]", meta.getColumnName(i)));
 			writer.write(String.format(" [%s]", meta.getColumnTypeName(i)));
-			_types.put(meta.getColumnName(i),  meta.getColumnTypeName(i));
 			if (meta.getColumnTypeName(i).equals("nvarchar")) writer.write("(max)");
 			writer.write(" NULL");
 			if (i != meta.getColumnCount()) writer.write(",");

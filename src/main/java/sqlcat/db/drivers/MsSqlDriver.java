@@ -1,11 +1,11 @@
-package viewtotable.db.drivers;
+package sqlcat.db.drivers;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
-import viewtotable.db.DBDriver;
+import sqlcat.db.DBDriver;
 
 public class MsSqlDriver extends DBDriver {
 

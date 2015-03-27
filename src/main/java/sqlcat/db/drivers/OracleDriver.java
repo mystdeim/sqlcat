@@ -1,10 +1,10 @@
-package viewtotable.db.drivers;
+package sqlcat.db.drivers;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import viewtotable.db.DBDriver;
+import sqlcat.db.DBDriver;
 
 public class OracleDriver extends DBDriver {
 	

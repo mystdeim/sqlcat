@@ -1,4 +1,4 @@
-package viewtotable.util;
+package sqlcat.util;
 
 public interface WorkerListener {
 	void start(String msg);

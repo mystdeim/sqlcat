@@ -1,4 +1,4 @@
-package viewtotable.gui;
+package sqlcat.gui;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
-import viewtotable.db.DBDriver;
-import viewtotable.util.Exporter;
-import viewtotable.util.Importer;
-import viewtotable.util.WorkerListener;
+import sqlcat.db.DBDriver;
+import sqlcat.util.Exporter;
+import sqlcat.util.Importer;
+import sqlcat.util.WorkerListener;
 
 
 public class Controller {
@@ -349,8 +349,7 @@ public class Controller {
 			
 			try {
 				_exporter.setParams(_server, _db, _login, _password, _port, _view.getDBType(), _db_file_path);
-				if (_view.getCheckBoxAllTables().isSelected()) _exporter.generate(_export_filepath);
-				else _exporter.generate(_objectname, _export_filepath);
+				_exporter.generate(_objectname, _export_filepath, _view.isCreateAllTables(), _view.isCreateTable());
 				
 				showSuccess();
 			} catch (Exception e) {

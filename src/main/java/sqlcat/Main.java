@@ -1,4 +1,4 @@
-package viewtotable;
+package sqlcat;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -16,8 +16,8 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import viewtotable.gui.Controller;
-import viewtotable.gui.View;
+import sqlcat.gui.Controller;
+import sqlcat.gui.View;
 
 public class Main {
 
